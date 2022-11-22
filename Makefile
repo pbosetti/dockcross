@@ -118,6 +118,7 @@ web-wasm: web-wasm/Dockerfile
 	cp -r test web-wasm/
 	$(DOCKER) build -t $(ORG)/web-wasm:$(TAG) \
 		-t $(ORG)/web-wasm:latest \
+		--platform linux/amd64,linux/arm64/v8 \
 		--build-arg IMAGE=$(ORG)/web-wasm \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
@@ -144,6 +145,7 @@ manylinux2014-aarch64: manylinux2014-aarch64/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
 	$(DOCKER) build -t $(ORG)/manylinux2014-aarch64:$(TAG) \
 		-t $(ORG)/manylinux2014-aarch64:latest \
+		--platform linux/amd64,linux/arm64/v8 \
 		--build-arg IMAGE=$(ORG)/manylinux2014-aarch64 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
@@ -166,6 +168,7 @@ manylinux_2_28-x64: manylinux_2_28-x64/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
 	$(DOCKER) build -t $(ORG)/manylinux_2_28-x64:$(TAG) \
 		-t $(ORG)/manylinux_2_28-x64:latest \
+		--platform linux/amd64,linux/arm64/v8 \
 		--build-arg IMAGE=$(ORG)/manylinux_2_28-x64 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
@@ -186,6 +189,7 @@ manylinux2014-x64: manylinux2014-x64/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
 	$(DOCKER) build -t $(ORG)/manylinux2014-x64:$(TAG) \
 		-t $(ORG)/manylinux2014-x64:latest \
+		--platform linux/amd64,linux/arm64/v8 \
 		--build-arg IMAGE=$(ORG)/manylinux2014-x64 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
@@ -206,6 +210,7 @@ manylinux2014-x86: manylinux2014-x86/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
 	$(DOCKER) build -t $(ORG)/manylinux2014-x86:$(TAG) \
 		-t $(ORG)/manylinux2014-x86:latest \
+		--platform linux/amd64,linux/arm64/v8 \
 		--build-arg IMAGE=$(ORG)/manylinux2014-x86 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
@@ -225,6 +230,7 @@ manylinux2014-x86.test: manylinux2014-x86
 base: Dockerfile imagefiles/
 	$(DOCKER) build -t $(ORG)/base:latest \
 		-t $(ORG)/base:$(TAG) \
+		--platform linux/amd64,linux/arm64/v8 \
 		--build-arg IMAGE=$(ORG)/base \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
 		.
@@ -247,6 +253,7 @@ $(STANDARD_IMAGES): %: %/Dockerfile base
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
 	$(DOCKER) build -t $(ORG)/$@:latest \
 		-t $(ORG)/$@:$(TAG) \
+		--platform linux/amd64,linux/arm64/v8 \
 		--build-arg IMAGE=$(ORG)/$@ \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
