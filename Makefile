@@ -12,6 +12,9 @@ ORG = dockcross
 # Directory where to generate the dockcross script for each images (e.g bin/dockcross-manylinux2014-x64)
 BIN = ./bin
 
+# Supported platforms: images are generated for each platform in the list
+GEN_PLATFORMS = linux/amd64,linux/arm64
+
 # These images are built using the "build implicit rule"
 STANDARD_IMAGES = android-arm android-arm64 android-x86 android-x86_64 \
 	linux-i686 linux-x86 linux-x64 linux-x64-clang linux-arm64 linux-arm64-musl linux-arm64-full \
@@ -116,15 +119,15 @@ $(GEN_IMAGE_DOCKERFILES) Dockerfile: %Dockerfile: %Dockerfile.in $(DOCKER_COMPOS
 web-wasm: web-wasm/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
 	cp -r test web-wasm/
-	$(DOCKER) build -t $(ORG)/web-wasm:$(TAG) \
+	$(DOCKER) buildx build -t $(ORG)/web-wasm:$(TAG) \
 		-t $(ORG)/web-wasm:latest \
-		--platform linux/amd64 \
-		--platform linux/arm64/v8 \
+		--platform $(GEN_PLATFORMS) \
 		--build-arg IMAGE=$(ORG)/web-wasm \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+		--push \
 		web-wasm
 	rm -rf web-wasm/test
 	rm -rf $@/imagefiles
@@ -144,16 +147,16 @@ manylinux2014-aarch64: manylinux2014-aarch64/Dockerfile
 	@# Get libstdc++ from quay.io/pypa/manylinux2014_aarch64 container
 	docker run -v `pwd`:/host --rm -e LIB_PATH=/host/$@/xc_script/ quay.io/pypa/manylinux2014_aarch64 bash -c "PASS=1 /host/$@/xc_script/docker_setup_scrpits/copy_libstd.sh"
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
-	$(DOCKER) build -t $(ORG)/manylinux2014-aarch64:$(TAG) \
+	$(DOCKER) buildx build -t $(ORG)/manylinux2014-aarch64:$(TAG) \
 		-t $(ORG)/manylinux2014-aarch64:latest \
-		--platform linux/amd64 \
-		--platform linux/arm64/v8 \
+		--platform $(GEN_PLATFORMS) \
 		--build-arg IMAGE=$(ORG)/manylinux2014-aarch64 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-		-f manylinux2014-aarch64/Dockerfile .
+		-f manylinux2014-aarch64/Dockerfile \
+		--push .
 	rm -rf $@/imagefiles
 	@# libstdc++ is coppied into image, now remove it
 	docker run -v `pwd`:/host --rm quay.io/pypa/manylinux2014_aarch64 bash -c "rm -rf /host/$@/xc_script/usr"
@@ -168,16 +171,16 @@ manylinux2014-aarch64.test: manylinux2014-aarch64
 #
 manylinux_2_28-x64: manylinux_2_28-x64/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
-	$(DOCKER) build -t $(ORG)/manylinux_2_28-x64:$(TAG) \
+	$(DOCKER) buildx build -t $(ORG)/manylinux_2_28-x64:$(TAG) \
 		-t $(ORG)/manylinux_2_28-x64:latest \
-		--platform linux/amd64 \
-		--platform linux/arm64/v8 \
+		--platform $(GEN_PLATFORMS) \
 		--build-arg IMAGE=$(ORG)/manylinux_2_28-x64 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-		-f manylinux_2_28-x64/Dockerfile .
+		-f manylinux_2_28-x64/Dockerfile \
+		--push .
 	rm -rf $@/imagefiles
 
 manylinux_2_28-x64.test: manylinux_2_28-x64
@@ -190,16 +193,16 @@ manylinux_2_28-x64.test: manylinux_2_28-x64
 #
 manylinux2014-x64: manylinux2014-x64/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
-	$(DOCKER) build -t $(ORG)/manylinux2014-x64:$(TAG) \
+	$(DOCKER) buildx build -t $(ORG)/manylinux2014-x64:$(TAG) \
 		-t $(ORG)/manylinux2014-x64:latest \
-		--platform linux/amd64 \
-		--platform linux/arm64/v8 \
+		--platform $(GEN_PLATFORMS) \
 		--build-arg IMAGE=$(ORG)/manylinux2014-x64 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-		-f manylinux2014-x64/Dockerfile .
+		-f manylinux2014-x64/Dockerfile \
+		--push .
 	rm -rf $@/imagefiles
 
 manylinux2014-x64.test: manylinux2014-x64
@@ -212,16 +215,16 @@ manylinux2014-x64.test: manylinux2014-x64
 #
 manylinux2014-x86: manylinux2014-x86/Dockerfile
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
-	$(DOCKER) build -t $(ORG)/manylinux2014-x86:$(TAG) \
+	$(DOCKER) buildx build -t $(ORG)/manylinux2014-x86:$(TAG) \
 		-t $(ORG)/manylinux2014-x86:latest \
-		--platform linux/amd64 \
-		--platform linux/arm64/v8 \
+		--platform $(GEN_PLATFORMS) \
 		--build-arg IMAGE=$(ORG)/manylinux2014-x86 \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-		-f manylinux2014-x86/Dockerfile .
+		-f manylinux2014-x86/Dockerfile \
+		--push .
 	rm -rf $@/imagefiles
 
 manylinux2014-x86.test: manylinux2014-x86
@@ -233,12 +236,12 @@ manylinux2014-x86.test: manylinux2014-x86
 # base
 #
 base: Dockerfile imagefiles/
-	$(DOCKER) build -t $(ORG)/base:latest \
+	$(DOCKER) buildx build -t $(ORG)/base:latest \
 		-t $(ORG)/base:$(TAG) \
-		--platform linux/amd64 \
-		--platform linux/arm64/v8 \
+		--platform $(GEN_PLATFORMS) \
 		--build-arg IMAGE=$(ORG)/base \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
+		--push \
 		.
 
 base.test: base
@@ -257,15 +260,15 @@ $(VERBOSE).SILENT: display_images
 
 $(STANDARD_IMAGES): %: %/Dockerfile base
 	mkdir -p $@/imagefiles && cp -r imagefiles $@/
-	$(DOCKER) build -t $(ORG)/$@:latest \
+	$(DOCKER) buildx build -t $(ORG)/$@:latest \
 		-t $(ORG)/$@:$(TAG) \
-		--platform linux/amd64 \
-		--platform linux/arm64/v8 \
+		--platform $(GEN_PLATFORMS) \
 		--build-arg IMAGE=$(ORG)/$@ \
 		--build-arg VERSION=$(TAG) \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg VCS_URL=`git config --get remote.origin.url` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+		--push \
 		$@
 	rm -rf $@/imagefiles
 
